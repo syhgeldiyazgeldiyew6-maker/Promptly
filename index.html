@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,62 +8,28 @@
     <style>
         :root { --bg: #ffffff; --text: #202124; --header: #ffffff; --primary: #4285F4; --border: #dfe1e5; --accent: #34a853; }
         .dark-mode { --bg: #202124; --text: #e8eaed; --header: #202124; --border: #3c4043; --accent: #00e676; }
-        
-        body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
-
+        body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; }
         header { position: sticky; top: 0; z-index: 100; background: var(--header); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .logo { font-size: 22px; font-weight: bold; color: var(--text); text-decoration: none; letter-spacing: -1px; }
+        .logo { font-size: 22px; font-weight: bold; color: var(--text); text-decoration: none; }
         .logo span { color: var(--primary); }
-
         .search-area { padding: 20px 15px; text-align: center; }
         .search-box { position: relative; max-width: 584px; margin: 0 auto; }
-        #mainSearch { width: 100%; padding: 12px 45px; border-radius: 24px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; outline: none; box-shadow: 0 1px 6px rgba(32,33,36,0.1); }
-        .search-box i { position: absolute; left: 15px; top: 14px; color: #9aa0a6; font-size: 18px; }
-
-        .sidebar { height: 100%; width: 0; position: fixed; z-index: 3000; top: 0; left: 0; background: var(--header); overflow-x: hidden; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
-        .sidebar-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        
-        #applyBtn { display: none; background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; animation: fadeIn 0.3s; }
-
-        .ai-nav-select { padding: 15px; background: var(--bg); border-bottom: 1px solid var(--border); }
-        .ai-options { display: flex; gap: 8px; }
-        .ai-opt { flex: 1; padding: 8px; border-radius: 20px; border: 1px solid var(--border); text-align: center; cursor: pointer; font-size: 13px; }
-        .ai-opt.selected { background: var(--primary); color: white; border-color: var(--primary); }
-
-        .cat-list { padding: 5px 0; }
-        .cat-item { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.03); cursor: pointer; }
-        .cat-item input[type="radio"] { margin-right: 15px; width: 18px; height: 18px; accent-color: var(--primary); }
-
+        #mainSearch { width: 100%; padding: 12px 45px; border-radius: 24px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; }
+        .search-box i { position: absolute; left: 15px; top: 14px; color: #9aa0a6; }
         #promptFeed { padding: 10px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
-        .news-item { background: var(--header); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); position: relative; }
-        .news-item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
-        .news-item .title { padding: 15px; font-size: 16px; font-weight: 500; color: var(--text); }
-        
-        /* Kopyalama Butonu */
-        .copy-btn { position: absolute; bottom: 15px; right: 15px; background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .news-item { background: var(--header); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); position: relative; margin-bottom: 10px; }
+        .news-item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #f8f9fa; }
+        .news-item .content { padding: 15px; }
+        .news-item .title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .news-item .desc { font-size: 14px; color: #5f6368; margin-bottom: 40px; }
+        .copy-btn { position: absolute; bottom: 15px; right: 15px; background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .copy-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-<div id="mySidebar" class="sidebar">
-    <div class="sidebar-header">
-        <button id="applyBtn" onclick="confirmSelection()">✅ APPLY</button>
-        <i class="fa fa-times" onclick="closeNav()" style="font-size: 20px; cursor: pointer;"></i>
-    </div>
-    
-    <div class="ai-nav-select">
-        <div class="ai-options">
-            <div id="btnChatGPT" class="ai-opt selected" onclick="selectAI('ChatGPT')">ChatGPT</div>
-            <div id="btnGemini" class="ai-opt" onclick="selectAI('Gemini')">Gemini</div>
-        </div>
-    </div>
-    <div class="cat-list" id="categoryContainer"></div>
-</div>
-
 <header>
-    <i class="fa fa-bars" onclick="openNav()"></i>
+    <i class="fa fa-bars" style="visibility:hidden"></i>
     <a href="#" class="logo"><span>P</span>romptly</a>
     <i class="fa fa-adjust" onclick="toggleDarkMode()"></i>
 </header>
@@ -71,97 +37,65 @@
 <div class="search-area">
     <div class="search-box">
         <i class="fa fa-search"></i>
-        <input type="text" id="mainSearch" placeholder="Search prompts..." onkeyup="search()">
+        <input type="text" id="mainSearch" placeholder="Promptlarda ara..." onkeyup="search()">
     </div>
 </div>
 
 <div id="promptFeed">
-    <div style="text-align:center; padding: 50px; color: #9aa0a6;">Yükleniyor...</div>
+    <div id="status" style="text-align:center; padding: 50px; color: #9aa0a6;">
+        <i class="fa fa-spinner fa-spin"></i><br><br>Veriler yükleniyor patron...
+    </div>
 </div>
 
 <script>
-    let selectedCategory = "Hepsi";
-    let currentAI = "ChatGPT";
-    let allPrompts = [];
-
-    // SENİN TABLO KİMLİĞİN
-    const SHEET_ID = '1CyvzuWjALYU_xyZWZZXnpypiIT4PHFJIAFOjUl6nQWI';
-    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
-
-    const categories = [
-        "Hepsi", "Photorealism", "Cinematic", "Anime & Manga", "3D Render", "Digital Art", 
-        "Logo Design", "Interior Design", "Product Photo", "Concept Art", 
-        "Symmetry & Abstract", "Cyberpunk", "Minimalism", "Retro & Vintage", 
-        "Fashion Design", "Isometric View"
-    ];
-
-    function openNav() { document.getElementById("mySidebar").style.width = "280px"; }
-    function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
 
-    function selectAI(ai) {
-        currentAI = ai;
-        document.getElementById('btnChatGPT').classList.remove('selected');
-        document.getElementById('btnGemini').classList.remove('selected');
-        document.getElementById('btn' + ai).classList.add('selected');
-        document.getElementById('applyBtn').style.display = "block";
-    }
+    // SENİN TABLONUN LİNKİ - BU FORMAT EN GÜVENLİSİ
+    const SHEET_ID = '1CyvzuWjALYU_xyZWZZXnpypiIT4PHFJIAFOjUl6nQWI';
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 
-    const catContainer = document.getElementById('categoryContainer');
-    categories.forEach(cat => {
-        const label = document.createElement('label');
-        label.className = 'cat-item';
-        label.innerHTML = `<input type="radio" name="cat" value="${cat}" ${cat==="Hepsi" ? "checked" : ""} onclick="showApply()"><span>${cat}</span>`;
-        catContainer.appendChild(label);
-    });
-
-    function showApply() {
-        document.getElementById('applyBtn').style.display = "block";
-        const selected = document.querySelector('input[name="cat"]:checked');
-        if(selected) selectedCategory = selected.value;
-    }
-
-    // Google Sheets'ten Veri Çekme
-    async function loadSheets() {
+    async function loadPrompts() {
         try {
-            const response = await fetch(SHEET_URL);
-            const data = await response.text();
-            const rows = data.split('\n').slice(1);
+            const response = await fetch(CSV_URL);
+            const text = await response.text();
             
-            allPrompts = rows.map(row => {
-                const cols = row.split('","').map(c => c.replace(/"/g, ''));
-                return { id: cols[0], kategori: cols[1], baslik: cols[2], prompt: cols[3], aciklama: cols[4], resim: cols[5] };
+            // CSV Parçalama Mantığı (Virgül ve Tırnak Karmaşasını Çözer)
+            const rows = text.split('\n').slice(1);
+            const feed = document.getElementById('promptFeed');
+            const status = document.getElementById('status');
+            
+            if (rows.length === 0) {
+                status.innerHTML = "Tablo boş görünüyor patron!";
+                return;
+            }
+
+            status.style.display = 'none';
+
+            rows.forEach(row => {
+                // regex ile tırnak içindeki virgülleri koruyarak parçala
+                const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                
+                if(cols && cols.length >= 4) {
+                    const cleanCols = cols.map(c => c.replace(/^"|"$/g, '').trim());
+                    const [id, kategori, baslik, prompt, aciklama, resim] = cleanCols;
+
+                    const div = document.createElement('div');
+                    div.className = 'news-item';
+                    div.innerHTML = `
+                        <img src="${resim || ''}" onerror="this.src='https://via.placeholder.com/600x600?text=Resim+Yuklenemedi'">
+                        <div class="content">
+                            <div class="title">${baslik}</div>
+                            <div class="desc">${aciklama || ''}</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyPrompt(\`${prompt.replace(/`/g, "\\`")}\`)">KODU KOPYALA</button>
+                    `;
+                    feed.appendChild(div);
+                }
             });
-            renderFeed(allPrompts);
         } catch (e) {
-            document.getElementById('promptFeed').innerHTML = "Veri yüklenemedi. Lütfen paylaşım ayarlarını kontrol et.";
+            document.getElementById('status').innerHTML = "Bağlantı kurulamadı. Sayfayı yenilemeyi dene patron!";
+            console.error(e);
         }
-    }
-
-    function renderFeed(data) {
-        const feed = document.getElementById('promptFeed');
-        feed.innerHTML = "";
-        
-        const filtered = data.filter(item => {
-            if(selectedCategory === "Hepsi") return true;
-            return item.kategori.toLowerCase() === selectedCategory.toLowerCase();
-        });
-
-        filtered.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'news-item';
-            div.innerHTML = `
-                <img src="${item.resim || 'https://via.placeholder.com/600'}" alt="Image">
-                <div class="title">${item.baslik}</div>
-                <button class="copy-btn" onclick="copyPrompt('${item.prompt.replace(/'/g, "\\'")}')">COPY PROMPT</button>
-            `;
-            feed.appendChild(div);
-        });
-    }
-
-    function confirmSelection() {
-        renderFeed(allPrompts);
-        closeNav();
     }
 
     function copyPrompt(text) {
@@ -177,8 +111,7 @@
         }
     }
 
-    // Başlat
-    loadSheets();
+    loadPrompts();
 </script>
 
 </body>
