@@ -11,22 +11,18 @@
         
         body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; overflow-x: hidden; }
 
-        /* Klasik Üst Bar */
         header { position: sticky; top: 0; z-index: 100; background: var(--header); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         .logo { font-size: 22px; font-weight: bold; color: var(--text); text-decoration: none; letter-spacing: -1px; }
         .logo span { color: var(--primary); }
 
-        /* Klasik Google Büyüteç ve Arama */
         .search-area { padding: 20px 15px; text-align: center; }
         .search-box { position: relative; max-width: 584px; margin: 0 auto; }
         #mainSearch { width: 100%; padding: 12px 45px; border-radius: 24px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; outline: none; box-shadow: 0 1px 6px rgba(32,33,36,0.1); }
         .search-box i { position: absolute; left: 15px; top: 14px; color: #9aa0a6; font-size: 18px; }
 
-        /* Sidebar & Kategori Seçimi */
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 3000; top: 0; left: 0; background: var(--header); overflow-x: hidden; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar-header { padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
         
-        /* ✅ Onay Butonu (Sadece seçim yapınca belirir) */
         #applyBtn { display: none; background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; animation: fadeIn 0.3s; }
 
         .ai-nav-select { padding: 15px; background: var(--bg); border-bottom: 1px solid var(--border); }
@@ -38,11 +34,13 @@
         .cat-item { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(0,0,0,0.03); cursor: pointer; }
         .cat-item input[type="radio"] { margin-right: 15px; width: 18px; height: 18px; accent-color: var(--primary); }
 
-        /* Feed */
         #promptFeed { padding: 10px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
-        .news-item { background: var(--header); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+        .news-item { background: var(--header); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); position: relative; }
         .news-item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
-        .news-item .title { padding: 15px; font-size: 16px; font-weight: 500; color: #3c4043; }
+        .news-item .title { padding: 15px; font-size: 16px; font-weight: 500; color: var(--text); }
+        
+        /* Kopyalama Butonu */
+        .copy-btn { position: absolute; bottom: 15px; right: 15px; background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -61,9 +59,7 @@
             <div id="btnGemini" class="ai-opt" onclick="selectAI('Gemini')">Gemini</div>
         </div>
     </div>
-
-    <div class="cat-list" id="categoryContainer">
-        </div>
+    <div class="cat-list" id="categoryContainer"></div>
 </div>
 
 <header>
@@ -80,14 +76,20 @@
 </div>
 
 <div id="promptFeed">
-    </div>
+    <div style="text-align:center; padding: 50px; color: #9aa0a6;">Yükleniyor...</div>
+</div>
 
 <script>
-    let selectedCategory = "";
+    let selectedCategory = "Hepsi";
     let currentAI = "ChatGPT";
+    let allPrompts = [];
+
+    // SENİN TABLO KİMLİĞİN
+    const SHEET_ID = '1CyvzuWjALYU_xyZWZZXnpypiIT4PHFJIAFOjUl6nQWI';
+    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 
     const categories = [
-        "Photorealism", "Cinematic", "Anime & Manga", "3D Render", "Digital Art", 
+        "Hepsi", "Photorealism", "Cinematic", "Anime & Manga", "3D Render", "Digital Art", 
         "Logo Design", "Interior Design", "Product Photo", "Concept Art", 
         "Symmetry & Abstract", "Cyberpunk", "Minimalism", "Retro & Vintage", 
         "Fashion Design", "Isometric View"
@@ -105,15 +107,11 @@
         document.getElementById('applyBtn').style.display = "block";
     }
 
-    // Kategorileri Radyo Butonu (•) ile Oluştur
     const catContainer = document.getElementById('categoryContainer');
     categories.forEach(cat => {
         const label = document.createElement('label');
         label.className = 'cat-item';
-        label.innerHTML = `
-            <input type="radio" name="cat" value="${cat}" onclick="showApply()">
-            <span>${cat}</span>
-        `;
+        label.innerHTML = `<input type="radio" name="cat" value="${cat}" ${cat==="Hepsi" ? "checked" : ""} onclick="showApply()"><span>${cat}</span>`;
         catContainer.appendChild(label);
     });
 
@@ -123,10 +121,52 @@
         if(selected) selectedCategory = selected.value;
     }
 
+    // Google Sheets'ten Veri Çekme
+    async function loadSheets() {
+        try {
+            const response = await fetch(SHEET_URL);
+            const data = await response.text();
+            const rows = data.split('\n').slice(1);
+            
+            allPrompts = rows.map(row => {
+                const cols = row.split('","').map(c => c.replace(/"/g, ''));
+                return { id: cols[0], kategori: cols[1], baslik: cols[2], prompt: cols[3], aciklama: cols[4], resim: cols[5] };
+            });
+            renderFeed(allPrompts);
+        } catch (e) {
+            document.getElementById('promptFeed').innerHTML = "Veri yüklenemedi. Lütfen paylaşım ayarlarını kontrol et.";
+        }
+    }
+
+    function renderFeed(data) {
+        const feed = document.getElementById('promptFeed');
+        feed.innerHTML = "";
+        
+        const filtered = data.filter(item => {
+            if(selectedCategory === "Hepsi") return true;
+            return item.kategori.toLowerCase() === selectedCategory.toLowerCase();
+        });
+
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'news-item';
+            div.innerHTML = `
+                <img src="${item.resim || 'https://via.placeholder.com/600'}" alt="Image">
+                <div class="title">${item.baslik}</div>
+                <button class="copy-btn" onclick="copyPrompt('${item.prompt.replace(/'/g, "\\'")}')">COPY PROMPT</button>
+            `;
+            feed.appendChild(div);
+        });
+    }
+
     function confirmSelection() {
-        console.log("Applied:", selectedCategory, "on", currentAI);
+        renderFeed(allPrompts);
         closeNav();
-        // Sheets Filtreleme Fonksiyonu Buraya Gelecek
+    }
+
+    function copyPrompt(text) {
+        navigator.clipboard.writeText(text);
+        alert("Prompt kopyalandı!");
     }
 
     function search() {
@@ -136,6 +176,9 @@
             item.style.display = item.innerText.toLowerCase().includes(val) ? "block" : "none";
         }
     }
+
+    // Başlat
+    loadSheets();
 </script>
 
 </body>
